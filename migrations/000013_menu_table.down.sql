@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS idx_menu_status;
+
+DROP TABLE IF EXISTS menu;

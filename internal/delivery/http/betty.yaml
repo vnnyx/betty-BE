@@ -1,0 +1,457 @@
+openapi: 3.0.0
+info:
+  title: Betty API
+  description: >
+    The Betty APIasdasd is designed for comprehensive management of food and ingredients in a restaurant setting. It offers endpoints for tracking inventory, managing recipes, handling supplier information, and overseeing menu items. This API simplifies kitchen management by providing real-time data on stock levels, nutritional information, and cost analysis.
+  version: 1.0.0
+servers:
+  - url: https://betty.vnnyx.dev/betty-api
+    description: Production server
+  - url: http://localhost:8000/betty-api
+    description: Local development server
+paths:
+  /user/owner:
+    post:
+      tags:
+        - User
+      summary: Create a new user (owner)
+      description: >
+        Creates a new user with the given information. The user will be assigned a unique ID and a JWT token will be returned for authentication.
+      requestBody:
+        description: User information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOwnerRequest"
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 201
+                      status:
+                        type: string
+                        example: Created
+                      data:
+                        $ref: "#/components/schemas/AuthResponse"
+                      error:
+                        type: object
+                        example: null
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      description: >
+        Authenticates a user with the given credentials. A JWT token will be returned for authentication.
+      requestBody:
+        description: User credentials
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        200:
+          description: User authenticated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 200
+                      status:
+                        type: string
+                        example: OK
+                      data:
+                        $ref: "#/components/schemas/AuthResponse"
+                      error:
+                        type: object
+                        example: null
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - Auth
+      summary: Refresh token
+      description: >
+        Refreshes the JWT token for a user with the given refresh token.
+      requestBody:
+        description: Refresh token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+              required:
+                - refresh_token
+      responses:
+        200:
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 200
+                      status:
+                        type: string
+                        example: OK
+                      data:
+                        $ref: "#/components/schemas/AuthResponse"
+                      error:
+                        type: object
+                        example: null
+
+  /auth/google:
+    get:
+      tags:
+        - Auth
+      summary: Google OAuth
+      description: >
+        Authenticates a user with Google OAuth. A JWT token will be returned for authentication.
+      parameters:
+        - name: code
+          in: query
+          description: Google OAuth code
+          required: true
+          schema:
+            type: string
+            example: 4/1AY0e-g4Q1Z2Z3Z4Z5Z6Z7Z8Z9Z0Z1Z2Z3Z4Z5Z6Z7Z8Z9Z0Z1Z2Z3Z4Z5Z6Z7Z8Z9Z0Z1Z2Z3Z4Z5Z6Z7Z8Z9Z0Z1Z2Z3Z4Z5Z6Z7Z8Z9Z0Z1Z2Z3Z4Z5Z6Z7Z8Z9Z0
+      responses:
+        200:
+          description: User authenticated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 200
+                      status:
+                        type: string
+                        example: OK
+                      data:
+                        $ref: "#/components/schemas/GoogleAuth"
+                      error:
+                        type: object
+                        example: null
+                      
+
+components:
+  schemas:
+    CreateOwnerRequest:
+      type: object
+      properties:
+        fullname:
+          type: string
+          example: John Doe
+        phone_number:
+          type: string
+          example: 0123456789
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: password
+        password_confirmation:
+          type: string
+          example: password
+        company:
+          type: object
+          properties:
+            brand_name:
+              type: string
+              example: Betty's Burgers
+            franchise_id:
+              type: integer
+              example: 1
+            street_address:
+              type: string
+              example: 123 Main St
+            suite_address:
+              type: string
+              example: Suite 1
+            city_id:
+              type: integer
+              example: 1
+            country_id:
+              type: integer
+              example: 1
+            zip_code:
+              type: string
+              example: 12345
+            photo:
+              type: string
+              example: base64-encoded-string
+          required:
+            - brand_name
+            - franchise_id
+            - city_id
+            - country_id
+      required:
+        - fullname
+        - phone_number
+        - email
+        - password
+        - password_confirmation
+        - company
+    
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: password
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        company:
+          $ref: "#/components/schemas/Company"
+        auth_details:
+          $ref: "#/components/schemas/AuthDetails"
+
+    GoogleAuth:
+      type: object
+      properties:
+        people:
+          type: object
+          properties:
+            emailAddresses:
+              type: array
+              items:
+                type: object
+                properties:
+                  "metadata":
+                    type: object
+                    properties:
+                      "primary":
+                        type: boolean
+                        example: true
+                      "source":
+                        type: object
+                        properties:
+                          "type":
+                            type: string
+                            example: "PROFILE"
+                      "sourcePrimary":
+                        type: boolean
+                        example: true
+                      "verified":
+                        type: boolean
+                        example: true
+                  "value": 
+                    type: string
+                    example: "john@email.com"
+            etag:
+              type: string
+              example: "abc123"
+            names:
+              type: array
+              items:
+                type: object
+                properties:
+                  "displayName":
+                    type: string
+                    example: "John Doe"
+                  "displayNameLastFirst":
+                    type: string
+                    example: "Doe, John"
+                  "familyName":
+                    type: string
+                    example: "Doe"
+                  "givenName":
+                    type: string
+                    example: "John"
+                  "metadata":
+                    type: object
+                    properties:
+                      "primary":
+                        type: boolean
+                        example: true
+                      "source":
+                        type: object
+                        properties:
+                          "id":
+                            type: string
+                            example: "1234567890"
+                          "type":
+                            type: string
+                            example: "PROFILE"
+                      "sourcePrimary":
+                        type: boolean
+                        example: true
+                  "unstructuredName":
+                    type: string
+                    example: "John Doe"
+            photos:
+              type: array
+              items:
+                type: object
+                properties:
+                  "default":
+                    type: boolean
+                    example: true
+                  "metadata":
+                    type: object
+                    properties:
+                      "primary":
+                        type: boolean
+                        example: true
+                      "source":
+                        type: object
+                        properties:
+                          "id":
+                            type: string
+                            example: "1234567890"
+                          "type":
+                            type: string
+                            example: "PROFILE"
+                  "url":
+                    type: string
+                    example: "https://lh3.googleusercontent.com/a-/AOh14Ghj1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h5i6j7k8l9m0n1o2p3q4r5s6t7u8v9w0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"
+            resourceName: 
+              type: string
+              example: "people/1234567890"
+        token:
+          type: object
+          properties:
+            access_token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+            token_type:
+              type: string
+              example: "Bearer"
+            refresh_token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+            expiry:
+              type: string
+              example: "2021-01-01T00:00:00.000Z"
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        brand_name:
+          type: string
+          example: Betty's Burgers
+        franchises:
+          type: array
+          items:
+            $ref: "#/components/schemas/Franchise"
+        street_address:
+          type: string
+          example: 123 Main St
+        suite_address:
+          type: string
+          example: Suite 1
+        city:
+          $ref: "#/components/schemas/City"
+        country:
+          $ref: "#/components/schemas/Country"
+
+    AuthDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        credential:
+          $ref: "#/components/schemas/Credential"
+
+    Credential:
+      type: object
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
+            example: owner
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+    
+    Franchise:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Betty's Burgers
+
+    City:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: New York
+
+    Country:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: United States
+
+    BaseResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        status:
+          type: string
+        data:
+          type: object
+          nullable: true
+        error:
+          type: object
+          nullable: true

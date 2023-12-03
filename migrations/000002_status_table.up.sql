@@ -1,0 +1,5 @@
+CREATE TABLE status (
+    id SERIAL PRIMARY KEY,
+    name STRING(100) NOT NULL,
+    color STRING(255) NOT NULL
+);

@@ -1,0 +1,4 @@
+config/* filter=git-crypt diff=git-crypt
+config/.backup/** !filter !diff
+k8s/* filter=git-crypt diff=git-crypt
+k8s/.backup/** !filter !diff
