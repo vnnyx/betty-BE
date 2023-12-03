@@ -94,7 +94,7 @@ jobs:
             kubectl apply -f k8s/app.yaml
           elif [ "$BRANCH_NAME" = "release" ]; then
             kubectl apply -f k8s/app-ingress.yaml
-            kubectl apply -f k8s/app-release.yaml
+            kubectl apply -f k8s/release-app.yaml
           else
             echo "No deployment for branch $BRANCH_NAME"
           fi
