@@ -83,7 +83,13 @@ jobs:
       - name: Update Kubernetes Deployment
         run: |
           BRANCH_NAME=${GITHUB_REF##*/}
-          sed -i "s|vnnyx/betty-api:latest|vnnyx/betty-api:${BRANCH_NAME}-${{ github.run_number }}-${{ github.sha }}|" k8s/app.yaml
+          if [ "$BRANCH_NAME" = "main" ]; then
+            sed -i "s|vnnyx/betty-api:latest|vnnyx/betty-api:${BRANCH_NAME}-${{ github.run_number }}-${{ github.sha }}|" k8s/app.yaml
+          elif [ "$BRANCH_NAME" = "release" ]; then
+            sed -i "s|vnnyx/betty-api:latest|vnnyx/betty-api:${BRANCH_NAME}-${{ github.run_number }}-${{ github.sha }}|" k8s/release-app.yaml
+          else
+            echo "No deployment for branch $BRANCH_NAME"
+          fi
 
       - name: Deploy to Kubernetes
         run: |
